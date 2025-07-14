@@ -1,4 +1,4 @@
-# ConnectLite Roadmap
+# CalLite Roadmap
 Just trying to implement similar features like calendly cal.com 
 This project is built with Next.js, TypeScript, Tailwind, PostgreSQL, and Prisma. Below is a day-by-day breakdown of the development plan.
 
