@@ -15,9 +15,79 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+  id             String  @id @default(uuid())
+  clerkUserId    String  @unique
+  email          String  @unique
+  username       String? @unique
+  name           String?
+  imageUrl       String @default("https://via.placeholder.com/150")
+  events         Event[] @relation("UserEvents")
+  bookings       Booking[] @relation("UserBookings")
 }
 
+
+
+model Event {
+  id             String    @id @default(uuid())
+  title          String
+  description    String?
+  price          Int
+  dateSlot       DateSlot[]
+  userId         String
+  user           User      @relation("UserEvents", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model DateSlot{
+  id             String    @id @default(uuid())
+  eventId        String
+  event          Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  date           DateTime
+  timeSlot      TimeSlot[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model TimeSlot{
+  id             String    @id @default(uuid())
+  dateSlotId     String
+  dateSlot       DateSlot  @relation(fields: [dateSlotId], references: [id], onDelete: Cascade)
+  time           DateTime
+  isBooked       Boolean    @default(false)
+  booking        Booking?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Booking {
+  id             String     @id @default(uuid())
+  timeSlotId     String     @unique // NEW: TimeSlotId to link bookings to time slots
+  timeSlot       TimeSlot   @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User       @relation("UserBookings", fields: [userId], references: [id])
+  name           String
+  email          String
+  meetLink       String?
+  googleEventId  String?
+  paymentStatus  PaymentStatus @default(PENDING) 
+  payment        Payment?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Payment {
+  id             String     @id @default(uuid())
+  bookingId      String @unique
+  amount         Int
+  status         PaymentStatus @default(PENDING)
+  booking        Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
