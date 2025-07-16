@@ -6,7 +6,7 @@ import { DashboardIcon } from '@radix-ui/react-icons'
 const Navbar = () => {
 
   return (
-    <nav className={`fixed w-full z-10 flex justify-between items-center px-2 bg-white h-16 shadow-xl`} >
+    <nav className={`w-full flex justify-between items-center px-2 bg-white h-16 shadow-xl`} >
         <div className="text-2xl font-bold text-gray-800">
             <Link href={"/"} className="text-gray-800 hover:text-gray-600">
                 CalLite

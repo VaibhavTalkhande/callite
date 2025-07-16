@@ -1,4 +1,4 @@
-import { eventSchema } from "@/app/utils/validation";
+import { eventSchema } from "@/utils/validation";
 import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/prisma";
 import { NextResponse,NextRequest } from "next/server";
@@ -8,6 +8,10 @@ export async function POST(req: NextRequest){
         const body = await req.json();
         const parsedData = eventSchema.parse(body);
         const userId = await requireAuth();
+        const user = await db.user.findUnique({ where: { clerkUserId: userId } });
+        if (!user) {
+        return new Response(JSON.stringify({ error: "User not found" }), { status: 404 });
+        }
         if(!userId) {
             return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
         }
@@ -20,7 +24,7 @@ export async function POST(req: NextRequest){
                 title,
                 description,
                 price,
-                userId
+                userId: user.id,
             }
         })
         return NextResponse.json(event, { status: 201 });

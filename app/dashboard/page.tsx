@@ -5,7 +5,7 @@ export default function Dashboard() {
   const { user } = useUser();
 
   return (
-    <div className="p-4">
+    <div className="p-4 relative mt-24">
       <h1 className="text-xl font-bold">Welcome {user?.fullName}</h1>
     </div>
   );
