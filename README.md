@@ -13,12 +13,12 @@ The unrealistic timeline for procastinator like me :)
 - Initialize Next.js app with TypeScript & Tailwind CSS
 - Set up PostgreSQL and Prisma
 - Create User model in Prisma
-- Set up authentication (Clerk or custom JWT)
+- Set up authentication (Clerk)
 - Protect routes using middleware
 - Create `/dashboard` route to verify authentication
 
 **Outcome:** Logged-in users can access the dashboard.
-
+status:done
 ---
 
 ## Day 2: Availability Management
@@ -33,7 +33,7 @@ The unrealistic timeline for procastinator like me :)
 - Implement API routes: `POST /api/availability`, `GET /api/availability/me`
 
 **Outcome:** Users can define when they're bookable.
-
+status:ongoing 
 ---
 
 ## Day 3: Booking System
