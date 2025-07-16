@@ -27,7 +27,7 @@ export async function POST(req: NextRequest){
                 userId: user.id,
             }
         })
-        return NextResponse.json(event, { status: 201 });
+        return NextResponse.json({event}, { status: 201 });
     }catch (error) {
         console.error("Error creating event:", error);
         return new Response(JSON.stringify({ error: "Internal Server Error" }), { status: 500 });
