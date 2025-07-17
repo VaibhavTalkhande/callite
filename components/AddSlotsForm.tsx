@@ -16,7 +16,7 @@ const schema = z.object({
   ),
 });
 
-export default function AddSlotsForm({ eventId }: { eventId: string }) {
+export default function AddSlotsForm({ eventId,onSlotsAdded }: { eventId: string;onSlotsAdded?: () => void; }) {
   const [dates, setDates] = useState([{ date: "", timeSlots: [""] }]);
   const router = useRouter();
 
@@ -57,6 +57,7 @@ export default function AddSlotsForm({ eventId }: { eventId: string }) {
 
     if (res.ok) {
       toast.success("Slots added successfully");
+      if (onSlotsAdded) onSlotsAdded();
       router.refresh();
     } else {
       toast.error("Something went wrong");

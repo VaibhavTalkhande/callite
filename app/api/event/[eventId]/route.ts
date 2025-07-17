@@ -20,12 +20,19 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         id: params.id,
         userId: user?.id, 
       },
+        include: {
+            dateSlot: {
+            include: {
+                timeSlot: true,
+            },
+            },
+        },
     });
   
     if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
   
     return NextResponse.json(event);
-  }
+}
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const userId  = await requireAuth();
