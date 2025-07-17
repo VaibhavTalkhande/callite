@@ -6,6 +6,27 @@ import { eventSchema } from "@/utils/validation";
 
 
 
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+    const userId = await requireAuth();
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  
+    const user = await db.user.findUnique({
+      where: {
+        clerkUserId: userId,
+      },
+    });
+    const event = await prisma.event.findFirst({
+      where: {
+        id: params.id,
+        userId: user?.id, // Ensure the event belongs to the authenticated user
+      },
+    });
+  
+    if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
+  
+    return NextResponse.json(event);
+  }
+
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const userId  = await requireAuth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
