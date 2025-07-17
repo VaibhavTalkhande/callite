@@ -3,6 +3,26 @@ import { requireAuth } from "@/lib/auth";
 import { db } from "@/lib/prisma";
 import { NextResponse,NextRequest } from "next/server";
 
+export async function GET(req: NextRequest){
+    const userId = await requireAuth();
+    if (!userId) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+    const user = await db.user.findUnique({ where: { clerkUserId: userId } });
+    if (!user) {
+        return new Response(JSON.stringify({ error: "User not found" }), { status: 404 });
+    }
+    try {
+        const events = await db.event.findMany({
+            where: { userId: user.id },
+            orderBy: { createdAt: "desc" },
+        });
+        return NextResponse.json(events);
+    } catch (error) {
+        console.error("Error fetching events:", error);
+        return new Response(JSON.stringify({ error: "Internal Server Error" }), { status: 500 });
+    }
+}
 export async function POST(req: NextRequest){
     try{
         const body = await req.json();

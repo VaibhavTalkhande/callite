@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const event = await prisma.event.findFirst({
       where: {
         id: params.id,
-        userId: user?.id, // Ensure the event belongs to the authenticated user
+        userId: user?.id, 
       },
     });
   
