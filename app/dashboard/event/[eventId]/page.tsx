@@ -5,53 +5,86 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import AddSlotsForm from "@/components/AddSlotsForm";
 
+type Event = {
+  id?: string;
+  title: string;
+  description: string | null;
+  price: number;
+  dateSlot: {
+    id?: string;
+    date: Date;
+    timeSlot: {
+      id?: string;
+      time: Date;
+      isBooked?: boolean;
+    }[];
+  }[];
+};
+
 export default function EditEventPage() {
-  const { id } = useParams();
+  const { eventId } = useParams()
   const [loading, setLoading] = useState(true);
-  const [event, setEvent] = useState({
-    title: "",
-    description: "",
-    price: 0,
-    dateSlot: [
-      {
-        id: "",
-        date: "",
-        timeSlot: [],
-      },
-    ],
-  }
+  const [event, setEvent] = useState<Event|null>(
+    {
+      title: "",
+      description: null,
+      price: 0,
+      dateSlot: [],
+    } as Event
   );
-  // Centralized fetch function
+  
   const fetchEvent = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/event/${id}`);
+    const res = await fetch(`/api/event/${eventId}`);
     const data = await res.json();
+    console.log(eventId, "event id");
     setEvent(data);
+    console.log("Fetched event:", data);
     setLoading(false);
-  }, [id]);
+  }, [eventId]);
 
   useEffect(() => {
     fetchEvent();
   }, [fetchEvent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setEvent((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setEvent((prev) => {
+      if (!prev) return prev;
+      if (name === "title") {
+        return { ...prev, title: value };
+      }
+      if (name === "description") {
+        return { ...prev, description: value };
+      }
+      if (name === "price") {
+        // Convert value to number for price to match Event type
+        const num = Number(value);
+        return { ...prev, price: isNaN(num) ? 0 : num };
+      }
+      return prev;
+    });
   };
+
 
   const handleSubmit = async () => {
-    const res = await fetch(`/api/event/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...event, price: Number(event.price) }),
-    });
+  const res = await fetch(`/api/event/${eventId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+      title: event?.title,
+      description: event?.description,
+      price: Number(event?.price ?? 0)
+    }),
+  });
 
-    if (res.ok) {
-      toast.success("Event updated");
-      fetchEvent(); // Refresh event data after update
-    } else {
-      toast.error("Failed to update event");
-    }
-  };
+  if (res.ok) {
+    toast.success("Event updated");
+    fetchEvent(); // Refresh event data after update
+  } else {
+    toast.error("Failed to update event");
+  }
+};
 
   const handleDeleteSlot = async (slotId: string) => {
     const res = await fetch(`/api/slots/${slotId}`, {
@@ -97,14 +130,14 @@ export default function EditEventPage() {
       <input
         name="title"
         className="w-full p-2 border mb-3"
-        value={event.title}
+        value={event?.title || ""}
         onChange={handleChange}
         placeholder="Event Title"
       />
       <textarea
         name="description"
         className="w-full p-2 border mb-3"
-        value={event.description}
+        value={event?.description || ""}
         onChange={handleChange}
         placeholder="Description"
       />
@@ -112,7 +145,7 @@ export default function EditEventPage() {
         name="price"
         type="number"
         className="w-full p-2 border mb-3"
-        value={event.price}
+        value={event?.price ?? ""}
         onChange={handleChange}
         placeholder="Price"
       />
@@ -120,7 +153,7 @@ export default function EditEventPage() {
         Update
       </button>
       <h3 className="text-lg font-semibold mt-8 mb-2">Existing Slots</h3>
-      {event.dateSlot?.map((date) => (
+      {event?.dateSlot?.map((date) => (
         <div key={date.id} className="mb-4 border rounded p-3">
           <div className="font-medium">{new Date(date.date).toDateString()}</div>
           <div className="grid grid-cols-2 gap-2 mt-2">
@@ -132,13 +165,18 @@ export default function EditEventPage() {
                 ) : (
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleEditSlot(slot)}
+                      onClick={() =>
+                        handleEditSlot({
+                          id: slot.id as string,
+                          time: typeof slot.time === "string" ? slot.time : slot.time.toISOString(),
+                        })
+                      }
                       className="text-blue-600 text-sm"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteSlot(slot.id)}
+                      onClick={() => handleDeleteSlot(slot.id as string)}
                       className="text-red-600 text-sm"
                     >
                       Delete
@@ -152,7 +190,7 @@ export default function EditEventPage() {
       ))}
 
 
-      <AddSlotsForm eventId={id as string} onSlotsAdded={fetchEvent} />
+      <AddSlotsForm eventId={eventId as string} onSlotsAdded={fetchEvent} />
     </div>
   );
 }
